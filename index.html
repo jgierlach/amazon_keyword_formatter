@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <!-- SEO -->
+  <title>Amazon Keyword Formatter</title>
+  <meta name="description" content="A free tool to format your keywords for the Amazon keyword field">
+  <!--Import Google Icon Font-->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <!--Let browser know website is optimized for mobile-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!--Import materialize.css-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" />
+</head>
+
+<body>
+  <style>
+    body {
+      text-align: center;
+      background: #f5f5f5;
+    }
+
+    .textarea-padding {
+      padding: 1.5em;
+    }
+
+    .distance-from-top {
+      margin-top: 3em;
+    }
+
+    .white-background {
+      background: white;
+    }
+  </style>
+
+  <!-- Header title   -->
+  <div class="container textarea-padding center z-depth-4 distance-from-top white-background row">
+    <div class="container col s12">
+      <h3>Enter Your List Of Keywords Below</h3>
+    </div>
+  </div>
+
+  <div class="container center z-depth-4 textarea-padding distance-from-top white-background">
+    <div class="row">
+      <div class="input-field col s12">
+        <textarea class="materialize-textarea" id="text-input"></textarea>
+        <label class="left" for="text-input">Keywords</label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col s12">
+        <button class="btn-large" id="btn">FORMAT KEYWORDS</button>
+      </div>
+    </div>
+
+    <div class="white-background z-depth-3 container textarea-padding row distance-from-top row">
+      <p class="col s12" id="keywords">Your keywords will appear here!</p>
+    </div>
+  </div>
+
+  <script>
+    // Do they have more than 249 characters entered
+    // If they do prompt them to reduce the number of keywords they are using
+    // If there keywords are under 245 What should our checks be 
+
+    // CHECKS:
+    // We need to check for punctuation no punctuation
+    // We need to check for plurals there should be no plurals
+    // The last thing we check for is uniqueness if after there are any words that are the same we need to optimize the list further
+    // Anyy text in between parentheses should be ignored and removed from the final result
+
+    // Checks if the input is over Amazon's allowed amount
+    const overAllowedCharacterLimit = (input) => {
+      return input.length > 249
+    }
+
+    // removes every character between parentheses
+    const removeCharsBetweenParens = (input) => {
+      let result = ''
+      let i = 0
+      while (i != input.length) {
+        if (input[i] == '(') {
+          while (input[i] != ')') {
+            i++
+          }
+        } else {
+          result += input[i]
+          i++
+        }
+      }
+      return result.trim()
+    }
+
+    // Removes all punctuation from the users input
+    const removePunctuation = (input) => {
+      // let test = removeCharsBetweenParens(input)
+      let result = input.replace(/\W+/g, ' ')
+      console.log('result', result)
+      return result
+    }
+
+    // Kind of resolves issues with plurals
+    const removePlurals = (inputArr) => {
+      const noPluralsArr = []
+      inputArr.forEach((element) => {
+        if (element.slice(element.length - 1, element.length) === 's') {
+          noPluralsArr.push(element.slice(0, element.length - 1))
+        } else {
+          noPluralsArr.push(element)
+        }
+      })
+      return noPluralsArr
+    }
+
+    // removes duplicate keywords from the array
+    const removeDuplicatesInArray = (inputArr) => {
+      let noDuplicates = []
+      noDuplicates = inputArr.filter(function (item, pos) {
+        return inputArr.indexOf(item) == pos;
+      })
+      return noDuplicates
+    }
+
+    const amazonKeywordOptimizer = (input) => {
+      // If there are any parentheses in the inital text remove them
+      // And any notes that might be written in between the parentheses
+      if (input.includes('(')) {
+        input = removeCharsBetweenParens(input)
+      }
+
+      // initial check for if input is over the allowed limit
+      if (overAllowedCharacterLimit(input)) {
+        return "You are over amazons allowed character limit. Please revise your list until your selected keywords are less than 249 characters."
+      }
+
+      // Get rid of punctuation
+      let inputNoPunctuation = removePunctuation(input).toLowerCase()
+
+      // Split into an array
+      const arrayInput = inputNoPunctuation.split(" ")
+
+      // Remove plurals
+      const removePluralsFromArray = removePlurals(arrayInput)
+
+      // Check for duplicates and if necessary remove duplicates
+      const result = removeDuplicatesInArray(removePluralsFromArray)
+
+      // return the final result as a string
+      return result.join(" ").trim()
+    }
+
+    window.onkeyup = keyup;
+    let inputTextValue;
+    function keyup(e) {
+      //setting your input text to the global Javascript Variable for every key press
+      inputTextValue = e.target.value;
+    }
+
+    // event listener that triggers the amazon keyword optimizer function on the user input when the button is clicked
+    document.getElementById('btn').addEventListener('click', () => {
+      // We're selecting the p tag with the id of 'keywords' and setting it equal to the output amazonKeyword Optimizer function
+      return document.getElementById('keywords').textContent = amazonKeywordOptimizer(inputTextValue)
+    })
+  </script>
+
+  <!--Script tag for JQuery-->
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+  <!--Script tag for materialize-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</body>
+
+</html>
